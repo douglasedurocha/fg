@@ -1,0 +1,11 @@
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\security\CustomUserDetailsService.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\SistemaGestaoApplication.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\controller\AuthController.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\security\SecurityConfig.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\service\AuthService.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\controller\UsuarioController.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\model\Usuario.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\security\JwtTokenProvider.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\repository\UsuarioRepository.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\exception\GlobalExceptionHandler.java
+C:\engenhariaDeSistemas\src\main\java\com\example\sistemagestao\security\JwtAuthenticationFilter.java
