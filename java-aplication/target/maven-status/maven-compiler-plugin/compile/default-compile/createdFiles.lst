@@ -1,0 +1,13 @@
+com\example\sistemagestao\controller\RegisterRequest.class
+com\example\sistemagestao\security\CustomUserDetailsService.class
+com\example\sistemagestao\repository\UsuarioRepository.class
+com\example\sistemagestao\controller\AuthController.class
+com\example\sistemagestao\exception\GlobalExceptionHandler.class
+com\example\sistemagestao\security\JwtTokenProvider.class
+com\example\sistemagestao\security\JwtAuthenticationFilter.class
+com\example\sistemagestao\controller\UsuarioController.class
+com\example\sistemagestao\model\Usuario.class
+com\example\sistemagestao\service\AuthService.class
+com\example\sistemagestao\SistemaGestaoApplication.class
+com\example\sistemagestao\security\SecurityConfig.class
+com\example\sistemagestao\controller\LoginRequest.class
