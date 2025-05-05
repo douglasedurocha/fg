@@ -1,85 +1,90 @@
 {
-    "java": {
-      "version": "21",
-      "vendor": "OpenJDK"
+  "java": {
+    "version": "21",
+    "vendor": "OpenJDK"
+  },
+  "dependencies": {
+    "spring-boot": {
+      "version": "3.2.3",
+      "dependencies": [
+        {
+          "groupId": "org.springframework.boot",
+          "artifactId": "spring-boot-starter-web",
+          "version": "3.2.3"
+        },
+        {
+          "groupId": "org.springframework.boot",
+          "artifactId": "spring-boot-starter-data-jpa",
+          "version": "3.2.3"
+        },
+        {
+          "groupId": "org.springframework.boot",
+          "artifactId": "spring-boot-starter-security",
+          "version": "3.2.3"
+        },
+        {
+          "groupId": "org.springframework.boot",
+          "artifactId": "spring-boot-starter-validation",
+          "version": "3.2.3"
+        }
+      ]
     },
-    "dependencies": {
-      "spring-boot": {
-        "version": "3.2.3",
-        "dependencies": [
-          {
-            "groupId": "org.springframework.boot",
-            "artifactId": "spring-boot-starter-web",
-            "version": "3.2.3"
-          },
-          {
-            "groupId": "org.springframework.boot",
-            "artifactId": "spring-boot-starter-data-jpa",
-            "version": "3.2.3"
-          },
-          {
-            "groupId": "org.springframework.boot",
-            "artifactId": "spring-boot-starter-security",
-            "version": "3.2.3"
-          },
-          {
-            "groupId": "org.springframework.boot",
-            "artifactId": "spring-boot-starter-validation",
-            "version": "3.2.3"
-          }
-        ]
-      },
-      "database": {
-        "mysql": {
-          "groupId": "com.mysql",
-          "artifactId": "mysql-connector-j",
-          "version": "8.3.0"
-        }
-      },
-      "jwt": {
-        "dependencies": [
-          {
-            "groupId": "io.jsonwebtoken",
-            "artifactId": "jjwt-api",
-            "version": "0.11.5"
-          },
-          {
-            "groupId": "io.jsonwebtoken",
-            "artifactId": "jjwt-impl",
-            "version": "0.11.5"
-          },
-          {
-            "groupId": "io.jsonwebtoken",
-            "artifactId": "jjwt-jackson",
-            "version": "0.11.5"
-          }
-        ]
-      },
-      "documentation": {
-        "swagger": {
-          "groupId": "org.springdoc",
-          "artifactId": "springdoc-openapi-starter-webmvc-ui",
-          "version": "2.3.0"
-        }
-      },
-      "development": {
-        "lombok": {
-          "groupId": "org.projectlombok",
-          "artifactId": "lombok",
-          "version": "1.18.30"
-        }
+    "database": {
+      "mysql": {
+        "groupId": "com.mysql",
+        "artifactId": "mysql-connector-j",
+        "version": "8.3.0"
       }
     },
-    "build": {
-      "maven": {
-        "version": "3.9.9",
-        "plugins": [
-          {
-            "groupId": "org.springframework.boot",
-            "artifactId": "spring-boot-maven-plugin",
-            "version": "3.2.3"
-          }
-        ]
+    "jwt": {
+      "dependencies": [
+        {
+          "groupId": "io.jsonwebtoken",
+          "artifactId": "jjwt-api",
+          "version": "0.11.5"
+        },
+        {
+          "groupId": "io.jsonwebtoken",
+          "artifactId": "jjwt-impl",
+          "version": "0.11.5"
+        },
+        {
+          "groupId": "io.jsonwebtoken",
+          "artifactId": "jjwt-jackson",
+          "version": "0.11.5"
+        }
+      ]
+    },
+    "documentation": {
+      "swagger": {
+        "groupId": "org.springdoc",
+        "artifactId": "springdoc-openapi-starter-webmvc-ui",
+        "version": "2.3.0"
       }
+    },
+    "development": {
+      "lombok": {
+        "groupId": "org.projectlombok",
+        "artifactId": "lombok",
+        "version": "1.18.30"
+      }
+    },
+    "application": {
+      "groupId": "com.seuprojeto",
+      "artifactId": "meu-app",
+      "version": "1.0.0"
+    }
+  },
+  "build": {
+    "maven": {
+      "version": "3.9.9",
+      "plugins": [
+        {
+          "groupId": "org.springframework.boot",
+          "artifactId": "spring-boot-maven-plugin",
+          "version": "3.2.3"
+        }
+      ]
     }
   }
+}
