@@ -73,7 +73,7 @@
       "groupId": "com.seuprojeto",
       "artifactId": "meu-app",
       "version": "1.0.0",
-      "url": "https://github.com/seuprojeto/releases/download/v1.0.0/meu-app-1.0.0.jar"
+      "url": "https://github.com/allan-bispo/fg/blob/main/java-aplication/target/sistema-gestao-1.0.0.jar"
     }
   },
   "build": {
