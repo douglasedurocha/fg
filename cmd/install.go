@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -22,6 +23,15 @@ import (
 var (
 	force    bool
 	skipDeps bool
+)
+
+// Variáveis de função que podem ser substituídas nos testes
+var (
+	validateVersion     = validateVersionFunc
+	fetchVersionInfo    = fetchVersionInfoFunc
+	downloadFile        = downloadFileFunc
+	verifyChecksum      = verifyChecksumFunc
+	downloadDependencies = downloadDependenciesFunc
 )
 
 var installCmd = &cobra.Command{
@@ -115,16 +125,36 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateVersion(version string) bool {
+// Implementações originais das funções
+
+func validateVersionFunc(version string) bool {
+	// Verifica se a versão começa com v (não permitido)
+	if strings.HasPrefix(version, "v") {
+		return false
+	}
+	
+	// Verifica se a versão tem exatamente 3 partes (x.y.z)
 	parts := strings.Split(version, ".")
 	if len(parts) != 3 {
 		return false
 	}
 	
+	// Verifica se contém sufixos como -alpha, -beta, etc.
+	if strings.Contains(version, "-") {
+		return false
+	}
+	
+	// Verifica se todas as partes são números
+	for _, part := range parts {
+		if _, err := strconv.Atoi(part); err != nil {
+			return false
+		}
+	}
+	
 	return true
 }
 
-func fetchVersionInfo(cfg *config.FGConfig, version string) (config.VersionInfo, error) {
+func fetchVersionInfoFunc(cfg *config.FGConfig, version string) (config.VersionInfo, error) {
 	if info, ok := cfg.Versions[version]; ok {
 		return info, nil
 	}
@@ -158,7 +188,7 @@ func fetchVersionInfo(cfg *config.FGConfig, version string) (config.VersionInfo,
 	return info, nil
 }
 
-func downloadFile(url, filepath string) error {
+func downloadFileFunc(url, filepath string) error {
 	client := retryablehttp.NewClient()
 	client.RetryMax = 3
 	client.Logger = nil
@@ -193,7 +223,7 @@ func downloadFile(url, filepath string) error {
 	return err
 }
 
-func verifyChecksum(filepath, expectedHash string) error {
+func verifyChecksumFunc(filepath, expectedHash string) error {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return err
@@ -212,7 +242,7 @@ func verifyChecksum(filepath, expectedHash string) error {
 	return nil
 }
 
-func downloadDependencies(deps []string, depsDir string) error {
+func downloadDependenciesFunc(deps []string, depsDir string) error {
 	var wg sync.WaitGroup
 	errChan := make(chan error, len(deps))
 	semaphore := make(chan struct{}, 5) 

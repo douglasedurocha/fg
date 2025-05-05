@@ -79,6 +79,71 @@ var startCmd = &cobra.Command{
 - Simular chamadas de sistema/rede para testes de `fg install/update`.
 - Validar comportamento cross-platform (manipulação de PID no Windows, sinais Unix).
 
+## Testes
+
+### Estrutura de Testes
+
+O projeto inclui várias categorias de testes:
+
+1. **Testes Unitários**: Testam componentes individuais isoladamente
+   - Testes para validação de versão
+   - Testes para verificação de checksum
+   - Testes para comparação de versões
+   - Testes de manipulação de PID e processos
+
+2. **Testes de Integração**: Testam a interação entre componentes
+   - Testes da execução de comandos completos
+   - Testes de download e instalação de versões
+   - Testes de início e interrupção de processos
+
+3. **Testes End-to-End**: Testam o fluxo completo de uso
+   - Fluxos de usuário simulados (instalação, iniciação, interrupção)
+   - Testes com um servidor HTTP mock
+
+4. **Testes com Mocks**: Usam simulações para testar comportamentos difíceis de reproduzir
+   - Mocks para downloaders
+   - Mocks para gerenciamento de processos
+   - Mocks para buscadores de versão
+
+### Executando os testes
+
+O projeto usa o Makefile para simplificar a execução dos testes. Os seguintes comandos estão disponíveis:
+
+```bash
+# Executar apenas testes unitários
+make test-unit
+
+# Executar testes de integração
+make test-integration
+
+# Executar todos os testes
+make test-all
+
+# Executar testes e gerar relatório de cobertura
+make test-coverage
+
+# Executar testes com detector de race conditions
+make test-race
+
+# Verificação completa: linting e testes
+make check
+```
+
+### Escrevendo novos testes
+
+Ao adicionar novas funcionalidades, siga estas diretrizes para testes:
+
+1. **Testes unitários**: Para cada função não-trivial, adicione um teste unitário no mesmo pacote, com o sufixo `_test.go`.
+
+2. **Use mocks quando apropriado**: Para dependências externas (HTTP, filesystem, processos), use mocks para isolar o comportamento que está sendo testado.
+
+3. **Testes de integração**: Para novos comandos ou fluxos de uso, adicione testes de integração que simulem a execução completa do comando.
+
+4. **Nomeação de testes**:
+   - `Test<NomeDaFunção>` para testes unitários
+   - `TestIntegration<Funcionalidade>` para testes de integração
+   - `TestMock<Funcionalidade>` para testes com mocks
+
 ### 5. Empacotamento
 - Usar `goreleaser` para construir binários para todos OS/arquiteturas.
 - Gerar man pages e scripts de autocompletar shell.

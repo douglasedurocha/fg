@@ -17,11 +17,14 @@ type FGConfig struct {
 	ActivePIDs  map[string]int         `yaml:"-" json:"-"`
 	LogLevel    string                 `yaml:"logLevel" json:"logLevel"`
 	DownloadURL string                 `yaml:"downloadUrl" json:"downloadUrl"`
+	Server      ServerConfig           `yaml:"server" json:"server"`
+}
 
 type JavaConfig struct {
 	MinVersion    string   `yaml:"minVersion" json:"minVersion"`
 	MaxVersion    string   `yaml:"maxVersion" json:"maxVersion"`
 	CustomJavaCmd string   `yaml:"customJavaCmd" json:"customJavaCmd"`
+	JvmArgs       []string `yaml:"jvmArgs" json:"jvmArgs"`
 }
 
 type ServerConfig struct {
@@ -91,10 +94,12 @@ func InitFGHome() (string, error) {
 func LoadConfig() (*FGConfig, error) {
 	home, err := InitFGHome()
 	if err != nil {
+		return nil, err
 	}
 
 	configPath := filepath.Join(home, "config", "config.yaml")
 	config := DefaultConfig()
+	config.FGHome = home
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if err := SaveConfig(config); err != nil {
@@ -149,11 +154,14 @@ func SaveConfig(config *FGConfig) error {
 func SaveActivePIDs(config *FGConfig) error {
 	pidsPath := filepath.Join(config.FGHome, "active_pids.json")
 	
+	pidsData, err := json.Marshal(config.ActivePIDs)
 	if err != nil {
 		return fmt.Errorf("erro ao serializar PIDs ativos: %w", err)
 	}
 	
+	if err := os.WriteFile(pidsPath, pidsData, 0644); err != nil {
 		return fmt.Errorf("erro ao escrever arquivo de PIDs ativos: %w", err)
 	}
 	
 	return nil
+}

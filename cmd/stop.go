@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fhir-guard/fg/config"
-	"github.com/shirou/gopsutil/v3/process"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -95,44 +93,6 @@ func runStop(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		fmt.Printf("Resumo: %d instância(s) parada(s), %d falha(s).\n", stoppedCount, failedCount)
-	}
-
-	return nil
-}
-
-func stopProcess(pid int32, forceKill bool, timeoutSec int) error {
-	proc, err := process.NewProcess(pid)
-	if err != nil {
-		return fmt.Errorf("processo não encontrado: %w", err)
-	}
-
-	running, err := proc.IsRunning()
-	if err != nil || !running {
-		return fmt.Errorf("processo não está em execução")
-	}
-
-	if forceKill {
-		if err := proc.Kill(); err != nil {
-			return fmt.Errorf("erro ao matar processo: %w", err)
-		}
-		return nil
-	}
-
-	if err := proc.Terminate(); err != nil {
-		return fmt.Errorf("erro ao terminar processo: %w", err)
-	}
-
-	deadline := time.Now().Add(time.Duration(timeoutSec) * time.Second)
-	for time.Now().Before(deadline) {
-		running, err := proc.IsRunning()
-		if err != nil || !running {
-			return nil
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	if err := proc.Kill(); err != nil {
-		return fmt.Errorf("erro ao matar processo após timeout: %w", err)
 	}
 
 	return nil
