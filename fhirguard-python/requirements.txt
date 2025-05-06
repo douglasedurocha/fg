@@ -1,0 +1,5 @@
+argparse
+PyYAML
+colorama
+psutil
+# PyQt5  # Descomente se for usar GUI 
