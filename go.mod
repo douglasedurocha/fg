@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.5
+	github.com/schollz/progressbar/v3 v3.14.1
 	github.com/shirou/gopsutil/v3 v3.23.11
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0

@@ -14,12 +14,14 @@ import (
 
 	"github.com/fhir-guard/fg/config"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
 var (
 	listRemote bool
 	listAll    bool
+	listLatest bool
 )
 
 type VersionMeta struct {
@@ -27,17 +29,24 @@ type VersionMeta struct {
 	ReleaseDate time.Time `json:"releaseDate"`
 	Installed   bool      `json:"installed"`
 	IsLatest    bool      `json:"isLatest"`
+	Size        int64     `json:"size"`
+	Dependencies []string  `json:"dependencies"`
 }
 
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lista versões disponíveis do FHIR Guard",
-	RunE:  runList,
+	Long: `Lista versões do FHIR Guard instaladas ou disponíveis remotamente.
+Use --remote para listar versões disponíveis para download.
+Use --all para listar todas as versões (instaladas e remotas).
+Use --latest para mostrar apenas a versão mais recente.`,
+	RunE: runList,
 }
 
 func init() {
 	listCmd.Flags().BoolVarP(&listRemote, "remote", "r", false, "Lista versões disponíveis remotamente")
 	listCmd.Flags().BoolVarP(&listAll, "all", "a", false, "Lista todas as versões (instaladas e remotas)")
+	listCmd.Flags().BoolVarP(&listLatest, "latest", "l", false, "Mostra apenas a versão mais recente")
 }
 
 func runList(cmd *cobra.Command, args []string) error {
@@ -46,14 +55,18 @@ func runList(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("erro ao carregar configuração: %w", err)
 	}
 
+	fmt.Print("Buscando versões instaladas... ")
 	installedVersions := getInstalledVersions(cfg)
+	fmt.Println("✓")
 	
 	var remoteVersions []VersionMeta
 	if listRemote || listAll {
+		fmt.Print("Buscando versões remotas... ")
 		remoteVersions, err = getRemoteVersions(cfg)
 		if err != nil {
 			return fmt.Errorf("erro ao obter versões remotas: %w", err)
 		}
+		fmt.Println("✓")
 	}
 
 	var versionsToShow []VersionMeta
@@ -87,6 +100,10 @@ func runList(cmd *cobra.Command, args []string) error {
 		return compareVersions(versionsToShow[i].Version, versionsToShow[j].Version) > 0
 	})
 
+	if listLatest && len(versionsToShow) > 0 {
+		versionsToShow = []VersionMeta{versionsToShow[0]}
+	}
+
 	if len(versionsToShow) == 0 {
 		if listRemote {
 			fmt.Println("Nenhuma versão remota encontrada.")
@@ -96,9 +113,9 @@ func runList(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Println("Versões do FHIR Guard:")
-	fmt.Printf("%-10s %-12s %s\n", "VERSÃO", "STATUS", "DATA DE LANÇAMENTO")
-	fmt.Println("------------------------------------")
+	fmt.Println("\nVersões do FHIR Guard:")
+	fmt.Printf("%-10s %-12s %-12s %-15s %s\n", "VERSÃO", "STATUS", "TAMANHO", "DATA", "DEPENDÊNCIAS")
+	fmt.Println("----------------------------------------------------------------")
 
 	for _, ver := range versionsToShow {
 		status := "         "
@@ -109,12 +126,23 @@ func runList(cmd *cobra.Command, args []string) error {
 			status += " (última)"
 		}
 		
-		dateStr := ""
+		sizeStr := "-"
+		if ver.Size > 0 {
+			sizeStr = fmt.Sprintf("%.1f MB", float64(ver.Size)/(1024*1024))
+		}
+		
+		dateStr := "-"
 		if !ver.ReleaseDate.IsZero() {
 			dateStr = ver.ReleaseDate.Format("02/01/2006")
 		}
 		
-		fmt.Printf("%-10s %-12s %s\n", ver.Version, status, dateStr)
+		depsStr := "-"
+		if len(ver.Dependencies) > 0 {
+			depsStr = strings.Join(ver.Dependencies, ", ")
+		}
+		
+		fmt.Printf("%-10s %-12s %-12s %-15s %s\n", 
+			ver.Version, status, sizeStr, dateStr, depsStr)
 	}
 
 	return nil

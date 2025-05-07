@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -16,6 +17,7 @@ import (
 
 	"github.com/fhir-guard/fg/config"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/schollz/progressbar/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +25,7 @@ import (
 var (
 	force    bool
 	skipDeps bool
+	verify   bool
 )
 
 // Variáveis de função que podem ser substituídas nos testes
@@ -37,13 +40,18 @@ var (
 var installCmd = &cobra.Command{
 	Use:   "install [versão]",
 	Short: "Instala uma versão específica do FHIR Guard",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runInstall,
+	Long: `Instala uma versão específica do FHIR Guard.
+O comando baixa o JAR da versão especificada, suas dependências
+e configurações padrão. Use --verify para validar a instalação
+após o download.`,
+	Args: cobra.ExactArgs(1),
+	RunE: runInstall,
 }
 
 func init() {
 	installCmd.Flags().BoolVarP(&force, "force", "f", false, "Força reinstalação mesmo se já existir")
 	installCmd.Flags().BoolVar(&skipDeps, "skip-deps", false, "Ignora download de dependências")
+	installCmd.Flags().BoolVar(&verify, "verify", false, "Verifica a instalação após o download")
 }
 
 func runInstall(cmd *cobra.Command, args []string) error {
@@ -60,6 +68,13 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	versionInfo, err := fetchVersionInfo(cfg, version)
 	if err != nil {
 		return fmt.Errorf("erro ao buscar informações da versão: %w", err)
+	}
+
+	// Verificar versão do Java
+	if versionInfo.RequiredJava != "" {
+		if err := verifyJavaVersion(versionInfo.RequiredJava); err != nil {
+			return fmt.Errorf("erro na verificação do Java: %w", err)
+		}
 	}
 
 	versionDir := filepath.Join(cfg.FGHome, "versions", version)
@@ -79,11 +94,12 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	if versionInfo.Checksum != "" {
+		fmt.Print("Verificando checksum... ")
 		if err := verifyChecksum(jarPath, versionInfo.Checksum); err != nil {
 			os.Remove(jarPath)
 			return fmt.Errorf("erro na verificação do checksum: %w", err)
 		}
-		fmt.Println("Checksum verificado com sucesso.")
+		fmt.Println("✓")
 	}
 
 	if !skipDeps && len(versionInfo.Dependencies) > 0 {
@@ -108,6 +124,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(versionInfo.DefaultConfigs) > 0 {
+		fmt.Print("Configurando arquivos padrão... ")
 		configDir := filepath.Join(versionDir, "config")
 		if err := os.MkdirAll(configDir, 0755); err != nil {
 			return fmt.Errorf("erro ao criar diretório de configuração: %w", err)
@@ -119,9 +136,55 @@ func runInstall(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("erro ao escrever arquivo de configuração %s: %w", filename, err)
 			}
 		}
+		fmt.Println("✓")
+	}
+
+	if verify {
+		fmt.Print("Verificando instalação... ")
+		if err := verifyInstallation(jarPath); err != nil {
+			return fmt.Errorf("erro na verificação da instalação: %w", err)
+		}
+		fmt.Println("✓")
 	}
 
 	fmt.Printf("FHIR Guard versão %s instalada com sucesso!\n", version)
+	return nil
+}
+
+func verifyJavaVersion(requiredVersion string) error {
+	cmd := exec.Command("java", "-version")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Java não encontrado: %w", err)
+	}
+
+	versionStr := string(output)
+	// Extrair versão do Java (ex: "1.8.0_312")
+	parts := strings.Split(versionStr, "\"")
+	if len(parts) < 2 {
+		return fmt.Errorf("não foi possível determinar a versão do Java")
+	}
+
+	installedVersion := parts[1]
+	if compareVersions(installedVersion, requiredVersion) < 0 {
+		return fmt.Errorf("versão do Java (%s) é inferior à requerida (%s)", 
+			installedVersion, requiredVersion)
+	}
+
+	return nil
+}
+
+func verifyInstallation(jarPath string) error {
+	cmd := exec.Command("java", "-jar", jarPath, "--version")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("erro ao executar JAR: %w", err)
+	}
+
+	if !strings.Contains(string(output), "FHIR Guard") {
+		return fmt.Errorf("JAR inválido ou corrompido")
+	}
+
 	return nil
 }
 
@@ -215,11 +278,21 @@ func downloadFileFunc(url, filepath string) error {
 	defer out.Close()
 
 	contentLength := resp.ContentLength
-	if contentLength > 0 {
-		fmt.Printf("Tamanho do arquivo: %.2f MB\n", float64(contentLength)/(1024*1024))
-	}
+	bar := progressbar.NewOptions64(
+		contentLength,
+		progressbar.OptionSetDescription("Baixando"),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "=",
+			SaucerHead:    ">",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}),
+	)
 
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(io.MultiWriter(out, bar), resp.Body)
 	return err
 }
 
