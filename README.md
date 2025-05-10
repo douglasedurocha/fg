@@ -1,114 +1,126 @@
-# Configuração do Projeto FHIR Guard CLI (`fg`)
+# FG - Java Application Manager
 
-## Escolha da Linguagem
-**Go (Golang)** é a linguagem recomendada para este projeto devido a:
-- **Compilação cross-platform** (Windows, macOS, Linux)
-- **Ferramentas robustas para CLI** (ex: bibliotecas Cobra/Viper)
-- **Performance** (compilada, sem dependências de runtime)
-- **Suporte a concorrência** (goroutines para tarefas paralelas)
+FG is a simple CLI tool that helps you manage different versions of Java applications. It can download, install, and run Java applications, while handling JDK dependencies automatically.
 
----
+## Features
 
-## Frameworks e Bibliotecas Necessárias
-### Dependências Principais
-| Categoria           | Ferramenta/Biblioteca                                                     | Finalidade                                                             |
-|---------------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| Framework CLI       | [`cobra`](https://github.com/spf13/cobra) + [`viper`](https://github.com/spf13/viper) | Gerenciamento de comandos/subcomandos, leitura de configurações        |
-| Cliente HTTP        | `net/http` nativo ou [`go-retryablehttp`](https://github.com/hashicorp/go-retryablehttp) | Download de versões/dependências, verificação de atualizações          |
-| Análise YAML        | [`gopkg.in/yaml.v3`](https://github.com/go-yaml/yaml)                     | Leitura/escrita de arquivos `config.yaml`                              |
-| Gerenciamento de Processos | `os/exec` + [`gopsutil`](https://github.com/shirou/gopsutil)          | Iniciar/parar apps Java, monitorar PID/uso de recursos (CPU, memória)  |
-| Logging             | [`logrus`](https://github.com/sirupsen/logrus) ou [`zap`](https://go.uber.org/zap) | Registro estruturado com níveis (debug, info, error)                   |
-| Testes              | [`testify`](https://github.com/stretchr/testify) + [`mockery`](https://github.com/vektra/mockery) | Testes unitários, simulação de chamadas de SO/rede                     |
+- Download and install specific versions of a Java application
+- Manage JDK dependencies
+- Install Maven dependencies
+- Start and stop application instances
+- Monitor running instances
+- View application logs
+- Uninstall versions when no longer needed
 
-### Opcionais/Avançadas
-| Categoria           | Ferramenta/Biblioteca                                                     | Finalidade                                                             |
-|---------------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| Integração GUI      | [`Wails`](https://wails.io/) (Go + frontend web) ou [`Fyne`](https://fyne.io/) | Construir GUI cross-platform para o comando `fg gui`                   |
-| Empacotamento       | [`goreleaser`](https://goreleaser.com/)                                   | Gerar binários específicos por SO (DEB, RPM, etc.)                     |
-| CI/CD               | GitHub Actions/GitLab CI                                                  | Testes automatizados, pipelines de release                             |
+## Installation
 
----
+### From Source
 
-## Etapas de Desenvolvimento
-
-### 1. Configuração do Projeto
 ```bash
-# Inicializar módulo Go
-go mod init github.com/fhir-guard/fg
+# Clone the repository
+git clone https://github.com/douglasedurocha/fg.git
+cd fg
 
-# Instalar dependências
-go get github.com/spf13/cobra@latest
-go get github.com/spf13/viper@latest
-go get github.com/shirou/gopsutil/v3@latest
+# Build the executable
+go build -o fg cmd/fg/main.go
+
+# Move the executable to a directory in your PATH (optional)
+sudo mv fg /usr/local/bin/
 ```
 
-### 2. Estrutura de Comandos (Cobra)
-Implementar comandos conforme a documentação:
-```go
-// Exemplo para `fg start`
-var startCmd = &cobra.Command{
-  Use:   "start [versão]",
-  Short: "Iniciar uma instância do FHIR Guard",
-  Args:  cobra.ExactArgs(1),
-  Run: func(cmd *cobra.Command, args []string) {
-    version := args[0]
-    // Lógica para iniciar app Java, validar configuração, rastrear PID
-  },
-}
+## Usage
+
+### List installed versions
+
+```bash
+fg list
 ```
 
-### 3. Funcionalidades Principais
-- **Gerenciamento de Instalação**:
-  - Baixar versões/JARs de URLs (paralelizar com goroutines).
-  - Validar versionamento semântico (`x.y.z`).
-  - Armazenar artefatos em `$FG_HOME/versions/[versão]/`.
+### List available versions
 
-- **Controle de Processos**:
-  - Usar `exec.Command` para iniciar processos Java com argumentos do `config.yaml`.
-  - Rastrear PIDs em arquivo JSON (ex: `$FG_HOME/active_pids.json`).
+```bash
+fg available
+```
 
-- **Configuração**:
-  - Gerar `config.yaml` padrão no `fg install`.
-  - Validar esquema YAML no `fg start`.
+Example output:
+```
+Version     Release Date
+--------    ------------
+2.0.0       2024-04-05
+1.2.0       2024-03-10
+1.1.0       2024-02-22
+1.0.0       2024-01-15
+```
 
-- **Rede**:
-  - Implementar retentativas/timeouts para downloads HTTP.
-  - Cachear metadados (ex: versões `available`) para evitar chamadas redundantes.
+### Install a specific version
 
-### 4. Testes
-- Simular chamadas de sistema/rede para testes de `fg install/update`.
-- Validar comportamento cross-platform (manipulação de PID no Windows, sinais Unix).
+```bash
+fg install 1.0.0
+```
 
-### 5. Empacotamento
-- Usar `goreleaser` para construir binários para todos OS/arquiteturas.
-- Gerar man pages e scripts de autocompletar shell.
+### Install the latest version
 
----
+```bash
+fg update
+```
 
-## Requisitos Adicionais
-### Gerenciamento de Dependências Java
-- **JDK**: Baixar/verificar versões especificadas nos metadados do FHIR Guard.
-- **Classpath**: Construir argumentos Java a partir de dependências no `config.yaml`.
+### View configuration for a version
 
-### Segurança
-- Validar certificados TLS durante downloads.
-- Criptografar campos sensíveis (ex: tokens de autenticação) no `config.yaml`.
+```bash
+fg config 1.0.0
+```
 
-### Performance
-- Analisar uso de memória para arquivos YAML grandes.
-- Limitar downloads/processos concorrentes com base nos limites do `config.yaml`.
+### Start an application
 
----
+```bash
+# Start with a specific version
+fg start 1.0.0
 
-## Pré-requisitos
-1. **Go 1.20+**: Necessário para módulos e generics.
-2. **Git**: Controle de versão.
-3. **Make**: Simplificar comandos de build/test (ex: `make release`).
-4. **Docker**: Testes cross-platform (opcional).
+# Start with the latest installed version
+fg start
+```
 
----
+### Check running instances
 
-## Próximos Passos
-1. Definir esquema de metadados das versões do FHIR Guard (JSON/YAML).
-2. Implementar `fg install` e `fg start` como protótipo funcional mínimo.
-3. Adicionar hooks de logging/métricas para `fg status` e `fg logs`.
+```bash
+fg status
+```
+
+### View logs
+
+```bash
+# View logs for a specific instance
+fg logs 1234  # where 1234 is the PID
+
+# View logs for the most recent instance
+fg logs
+```
+
+### Stop an instance
+
+```bash
+# Stop a specific instance
+fg stop 1234  # where 1234 is the PID
+
+# Stop all running instances
+fg stop
+```
+
+### Uninstall a version
+
+```bash
+fg uninstall 1.0.0
+```
+
+## Configuration
+
+FG stores all data in the `~/.fg` directory:
+
+- `~/.fg/versions/` - Installed versions
+- `~/.fg/jdk/` - JDK installations
+- `~/.fg/logs/` - Application logs
+- `~/.fg/downloads/` - Temporary download files
+
+## License
+
+MIT 
