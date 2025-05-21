@@ -28,6 +28,69 @@
 | CI/CD               | GitHub Actions/GitLab CI                                                  | Testes automatizados, pipelines de release                             |
 
 ---
+## Diagrama de Componentes
+
+```mermaid
+flowchart TD
+  subgraph CLI_App["FHIR Guard CLI (fg)"]
+    direction TB
+
+    CLI["Comandos CLI (cobra + viper)"]
+    Config["Configuração (config.yaml, validação YAML)"]
+    Installer["Gerenciamento de Instalação<br>(download, validação, armazenamento)"]
+    ProcessManager["Controle de Processos<br>(exec.Command + gopsutil)"]
+    Network["Cliente HTTP<br>(net/http ou go-retryablehttp)"]
+    Logger["Logging (logrus ou zap)"]
+    VersionMgr["Gerenciador de Versão atual"]
+    Tests["Testes (testify, mockery)"]
+
+    CLI --> Config
+    CLI --> Installer
+    CLI --> ProcessManager
+    CLI --> Logger
+    Installer --> Network
+    Installer --> VersionMgr
+    ProcessManager --> Config
+    ProcessManager --> Logger
+    ProcessManager --> VersionMgr
+    CLI --> Tests
+  end
+
+  subgraph Optional_Features["Funcionalidades Opcionais"]
+    GUI["GUI (Wails ou Fyne)"]
+    Packaging["Empacotamento (goreleaser)"]
+    CICD["CI/CD (GitHub Actions, GitLab CI)"]
+  end
+
+  CLI_App --> Optional_Features
+
+  subgraph External["Ambiente Externo"]
+    JDK["JDK (download/verificação)"]
+    JavaApp["Aplicação Java (instanciada pelo fg)"]
+    OS["Sistema Operacional (Windows, macOS, Linux)"]
+    FileSystem["Sistema de Arquivos ($FG_HOME)"]
+  end
+
+  Installer --> FileSystem
+  ProcessManager --> JavaApp
+  ProcessManager --> OS
+  Config --> FileSystem
+  Installer --> JDK
+  JavaApp --> OS
+
+  %% Testes detalhados
+  subgraph Testing["Estrutura de Testes"]
+    UnitTests["Testes Unitários"]
+    IntegrationTests["Testes de Integração"]
+    E2ETests["Testes End-to-End"]
+    MockTests["Testes com Mocks"]
+  end
+
+  Tests --> UnitTests
+  Tests --> IntegrationTests
+  Tests --> E2ETests
+  Tests --> MockTests
+```
 
 ## Etapas de Desenvolvimento
 
