@@ -31,6 +31,7 @@ def cli():
     # Create necessary subdirectories
     os.makedirs(os.path.join(fg_dir, "versions"), exist_ok=True)
     os.makedirs(os.path.join(fg_dir, "logs"), exist_ok=True)
+    os.makedirs(os.path.join(fg_dir, "jdks"), exist_ok=True)
 
 # Register commands
 cli.add_command(available)

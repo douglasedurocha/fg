@@ -76,6 +76,17 @@ def start_application(version):
             console.print(f"[bold red]No run command found in manifest for version {version}[/bold red]")
             return None
         
+        # Get the appropriate java executable
+        from utils.jdk import get_java_executable_for_version
+        java_executable = get_java_executable_for_version(version)
+        
+        # Replace 'java' in the run command with the specific java executable
+        if java_executable != 'java':
+            run_command = run_command.replace('java ', f'{java_executable} ')
+        else:
+            # If using system java, ensure it's available
+            run_command = run_command.replace('java ', 'java ')
+        
         # Create log file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_file = os.path.join(get_logs_dir(), f"{version}_{timestamp}.log")
@@ -109,7 +120,9 @@ def start_application(version):
             process = subprocess.Popen(run_command, shell=True, cwd=version_dir,
                                       stdout=log_file_handle, stderr=subprocess.STDOUT)
         else:
-            args = run_command.split()
+            # Use shlex to properly split command with paths that may contain spaces
+            import shlex
+            args = shlex.split(run_command)
             process = subprocess.Popen(args, cwd=version_dir,
                                       stdout=log_file_handle, stderr=subprocess.STDOUT)
         

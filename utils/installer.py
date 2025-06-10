@@ -122,6 +122,14 @@ def install_from_zip(zip_path, version):
         with open(manifest_path, 'r') as f:
             manifest = json.load(f)
         
+        # Download JDK if specified in manifest
+        if 'jdk' in manifest:
+            from utils.jdk import download_jdk
+            jdk_dir = download_jdk(manifest['jdk'], version)
+            if not jdk_dir:
+                console.print(f"[bold red]Failed to download JDK for version {version}[/bold red]")
+                return False
+        
         # Download dependencies
         if 'dependencies' in manifest and manifest['dependencies']:
             install_dependencies(manifest['dependencies'], version_dir)
@@ -191,6 +199,20 @@ def uninstall_version(version):
         return False
     
     try:
+        # Clean up JDK if it exists
+        manifest_path = get_manifest_path(version)
+        if os.path.exists(manifest_path):
+            try:
+                with open(manifest_path, 'r') as f:
+                    manifest = json.load(f)
+                
+                if 'jdk' in manifest:
+                    from utils.jdk import cleanup_jdk
+                    jdk_version = manifest['jdk'].get('version', 'unknown')
+                    cleanup_jdk(version, jdk_version)
+            except Exception as e:
+                console.print(f"[yellow]Warning: Failed to clean up JDK: {str(e)}[/yellow]")
+        
         shutil.rmtree(version_dir)
         # Success message moved to command handler
         return True
