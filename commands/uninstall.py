@@ -1,7 +1,7 @@
 import click
 from rich.console import Console
 
-from utils.installer import uninstall_version, is_version_installed
+from core.installer import uninstall_version, is_version_installed
 
 console = Console()
 

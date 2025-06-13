@@ -2,7 +2,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from utils.github import get_available_versions
+from core.github import get_available_versions
 
 console = Console()
 

@@ -3,7 +3,7 @@ import json
 import pytest
 import shutil
 from unittest.mock import patch, MagicMock
-from utils.installer import (
+from core.installer import (
     get_fg_dir,
     get_versions_dir,
     get_logs_dir,
@@ -12,7 +12,7 @@ from utils.installer import (
     get_installed_versions,
     find_file_in_dir
 )
-from utils.process import (
+from core.process import (
     load_processes,
     save_processes,
     start_application,
@@ -90,8 +90,8 @@ def test_find_file_in_dir(setup_test_version, test_version):
     not_found = find_file_in_dir(version_dir, "nonexistent.txt")
     assert not_found is None
 
-@patch('utils.process.psutil.pid_exists')
-@patch('utils.process.psutil.Process')
+@patch('core.process.psutil.pid_exists')
+@patch('core.process.psutil.Process')
 def test_process_management(mock_process, mock_pid_exists, fg_dir):
     """Test process management functions"""
     # Configure mocks
@@ -134,8 +134,8 @@ def test_process_management(mock_process, mock_pid_exists, fg_dir):
     if os.path.exists(processes_file):
         os.remove(processes_file)
 
-@patch('utils.process.subprocess.Popen')
-@patch('utils.jdk.get_java_executable_for_version')
+@patch('core.process.subprocess.Popen')
+@patch('core.jdk.get_java_executable_for_version')
 def test_start_stop_application(mock_java_exec, mock_popen, setup_test_version, test_version):
     """Test application start and stop functions"""
     # Configure mocks
@@ -149,8 +149,8 @@ def test_start_stop_application(mock_java_exec, mock_popen, setup_test_version, 
     assert pid == 12345
     
     # Mock process status
-    with patch('utils.process.load_processes') as mock_load, \
-         patch('utils.process.psutil.Process') as mock_psutil_proc:
+    with patch('core.process.load_processes') as mock_load, \
+         patch('core.process.psutil.Process') as mock_psutil_proc:
         mock_load.return_value = {
             "12345": {
                 "version": test_version,

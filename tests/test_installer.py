@@ -3,7 +3,7 @@ import json
 import pytest
 import shutil
 import zipfile
-from utils.installer import (
+from core.installer import (
     install_from_zip,
     uninstall_version,
     install_dependencies

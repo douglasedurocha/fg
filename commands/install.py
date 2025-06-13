@@ -1,8 +1,8 @@
 import click
 from rich.console import Console
 
-from utils.github import download_version
-from utils.installer import install_from_zip, is_version_installed
+from core.github import download_version
+from core.installer import install_from_zip, is_version_installed
 
 console = Console()
 
