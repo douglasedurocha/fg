@@ -20,10 +20,10 @@ flowchart TD
     direction TB
 
     Entry["CLI Principal<br>(Click)"]
-    Config["Gerenciador de Configuração<br>(utils/config.py)"]
-    Installer["Gerenciamento de Instalação<br>(utils/installer.py)"]
-    ProcessManager["Controle de Processos<br>(utils/process.py, psutil)"]
-    GitHubClient["Cliente GitHub<br>(utils/github.py, requests)"]
+    Config["Gerenciador de Configuração<br>(core/config.py)"]
+    Installer["Gerenciamento de Instalação<br>(core/installer.py)"]
+    ProcessManager["Controle de Processos<br>(core/process.py, psutil)"]
+    GitHubClient["Cliente GitHub<br>(core/github.py, requests)"]
     Logger["Logger e Formatação<br>(Rich)"]
     VersionMgr["Gerenciador de Versões<br>(commands/*.py)"]
     Tests["Testes (pytest, unittest)"]
@@ -118,7 +118,7 @@ flowchart TD
    * **Interface gráfica:** `python fg.py gui`
   5. Testes
   ```bash
-    python -m pytest test_fg.py test_utils.py test_installer.py -v --cov=. --cov-report=term-missing
+    python -m pytest test_fg.py test_core.py test_installer.py -v --cov=. --cov-report=term-missing
   ```
 
 ## Comunicação do Time

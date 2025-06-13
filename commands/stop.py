@@ -1,7 +1,7 @@
 import click
 from rich.console import Console
 
-from utils.process import stop_application
+from core.process import stop_application
 
 console = Console()
 

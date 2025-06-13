@@ -2,7 +2,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from utils.process import get_process_status
+from core.process import get_process_status
 
 console = Console()
 

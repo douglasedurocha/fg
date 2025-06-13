@@ -3,7 +3,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from utils.installer import get_installed_versions, get_versions_dir
+from core.installer import get_installed_versions, get_versions_dir
 
 console = Console()
 

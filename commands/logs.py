@@ -2,7 +2,7 @@ import click
 from rich.console import Console
 from rich.syntax import Syntax
 
-from utils.process import get_logs
+from core.process import get_logs
 
 console = Console()
 

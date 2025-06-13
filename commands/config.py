@@ -2,7 +2,7 @@ import click
 from rich.console import Console
 from rich.pretty import Pretty
 
-from utils.config import get_version_config
+from core.config import get_version_config
 
 console = Console()
 

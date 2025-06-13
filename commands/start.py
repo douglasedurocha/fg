@@ -1,8 +1,8 @@
 import click
 from rich.console import Console
 
-from utils.process import start_application
-from utils.installer import is_version_installed, get_installed_versions
+from core.process import start_application
+from core.installer import is_version_installed, get_installed_versions
 
 console = Console()
 
