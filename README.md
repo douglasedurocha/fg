@@ -95,8 +95,8 @@ flowchart TD
 
    ```bash
    python -m venv meu_projeto
-   venv\Scripts\activate (windows)
-   pip install -r requirements.txt
+   meu_projeto\Scripts\activate (windows)
+   pip install -r requirements.txt (se der erro de permissão, colocar --user antes do -r)
    ```
 3. Torne o script principal executável (opcional em Linux/macOS):
 
@@ -116,6 +116,10 @@ flowchart TD
    * **Parar uma instância em execução:** `python fg.py stop <pid>`
    * **Desinstalar uma versão:** `python fg.py uninstall <versão>`
    * **Interface gráfica:** `python fg.py gui`
+  5. Testes
+  ```bash
+    python -m pytest test_fg.py test_utils.py test_installer.py -v --cov=. --cov-report=term-missing
+  ```
 
 ## Comunicação do Time
 
